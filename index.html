@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triad T Enterprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+  /* =============================================
+     RESET
+  ============================================= */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow-x: hidden; }
+
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* =============================================
+     NAVIGATION — same layout as tylerraw
+  ============================================= */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 20px;
+    height: 60px;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .nav-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c8a96e, #8b6914);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    color: #fff;
+    flex-shrink: 0;
+    margin-right: 12px;
+    overflow: hidden;
+  }
+  .nav-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+
+  .nav-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    color: #fff;
+    text-decoration: none;
+    margin-right: 28px;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+    flex: 1;
+  }
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  .nav-join {
+    background: #7c3aed;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .nav-join:hover { background: #6d28d9; }
+
+  .nav-signin {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    margin-right: 16px;
+    transition: color 0.2s;
+  }
+  .nav-signin:hover { color: #fff; }
+
+  /* =============================================
+     HERO — FULLSCREEN VIDEO BACKGROUND
+  ============================================= */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  /* VIDEO BACKGROUND — swap src with your real video file */
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+    /* Placeholder: shows when no video is loaded */
+  }
+
+  /* Fallback gradient when no video */
+  .hero-video-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(60,40,10,0.7) 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 80%, rgba(10,20,50,0.6) 0%, transparent 55%),
+      linear-gradient(160deg, #1a1208 0%, #080808 45%, #0d0d18 100%);
+    /* Simulated video frames using CSS animation */
+    animation: vidSim 8s ease-in-out infinite alternate;
+  }
+  @keyframes vidSim {
+    0%   { background-position: 0% 0%; filter: brightness(0.7); }
+    33%  { filter: brightness(0.75); }
+    66%  { filter: brightness(0.65); }
+    100% { background-position: 100% 100%; filter: brightness(0.72); }
+  }
+
+  /* Animated "bokeh" dots to simulate video depth */
+  .video-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .vp {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(200,169,110,0.15);
+    filter: blur(40px);
+    animation: vpFloat linear infinite;
+  }
+
+  /* Dark overlay on top of video — same as tylerraw */
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.52);
+  }
+  /* Bottom fade to black */
+  .hero-overlay::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(to bottom, transparent, rgba(10,10,10,0.9));
+  }
+
+  /* Content sits above overlay */
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px;
+    max-width: 560px;
+    width: 100%;
+    margin-top: 20px; /* offset for fixed nav */
+  }
+
+  /* MAIN TITLE — same weight/size as TYLER RAW */
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 14vw, 96px);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    text-shadow: 0 2px 40px rgba(0,0,0,0.6);
+    margin-bottom: 16px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  /* TAGLINE — same style as "Uncensored. Unbannable." */
+  .hero-tagline {
+    font-size: clamp(14px, 3.5vw, 17px);
+    font-weight: 400;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.55;
+    text-align: center;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.8);
+    margin-bottom: 40px;
+    max-width: 380px;
+    animation: fadeDown 0.7s 0.15s ease both;
+  }
+
+  /* STACKED CTA BUTTONS — exactly like tylerraw */
+  .hero-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 320px;
+    animation: fadeDown 0.7s 0.3s ease both;
+  }
+
+  .hero-btn {
+    display: block;
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    color: #fff;
+    transition: transform 0.15s ease, filter 0.15s ease;
+    letter-spacing: 0.01em;
+    border: none;
+    cursor: pointer;
+  }
+  .hero-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12);
+  }
+  .hero-btn:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+  }
+
+  /* Red — primary action (like "Become a Member") */
+  .btn-red   { background: #e03c31; }
+
+  /* Blue — secondary (like "Videos") */
+  .btn-blue  { background: #3b7de8; }
+
+  /* Green — support (like "Donate") */
+  .btn-green { background: #2eab5e; }
+
+  /* =============================================
+     SCROLL INDICATOR
+  ============================================= */
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeIn 1s 1.2s forwards;
+  }
+  .scroll-hint span {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+  .scroll-chevron {
+    width: 20px;
+    height: 20px;
+    border-right: 1.5px solid rgba(255,255,255,0.3);
+    border-bottom: 1.5px solid rgba(255,255,255,0.3);
+    transform: rotate(45deg);
+    animation: bounce 1.8s ease-in-out infinite;
+  }
+
+  /* =============================================
+     BELOW HERO — content sections
+  ============================================= */
+  .content-sections {
+    background: #0a0a0a;
+    padding: 80px 24px 120px;
+  }
+  .content-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Latest videos row */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    margin-bottom: 24px;
+    border-bottom: 2px solid rgba(255,255,255,0.08);
+    padding-bottom: 12px;
+  }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 64px;
+  }
+
+  .video-card {
+    background: #141414;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+  }
+  .video-card:hover {
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-3px);
+  }
+  .video-thumb {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+  .video-thumb-bg {
+    position: absolute;
+    inset: 0;
+  }
+  .thumb-1 { background: linear-gradient(135deg, #1a120a, #2d1f0e 60%, #0d0d0d); }
+  .thumb-2 { background: linear-gradient(135deg, #0a0a1a, #0e1a2d 60%, #0d0d0d); }
+  .thumb-3 { background: linear-gradient(135deg, #0a1a0e, #0e2d18 60%, #0d0d0d); }
+
+  /* Simulated video frame lines */
+  .video-thumb-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+  }
+
+  .play-btn {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .video-card:hover .play-btn {
+    background: rgba(255,255,255,0.28);
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  .play-btn::after {
+    content: '';
+    border: 0 solid transparent;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 12px solid #fff;
+    margin-left: 3px;
+  }
+
+  .duration-badge {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.03em;
+  }
+
+  .video-meta {
+    padding: 12px 14px 16px;
+  }
+  .video-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #c8a96e;
+    margin-bottom: 6px;
+  }
+  .video-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.4;
+  }
+
+  /* Members section */
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .plan-card {
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 28px 24px;
+    transition: border-color 0.25s, transform 0.2s;
+  }
+  .plan-card:hover {
+    border-color: rgba(200,169,110,0.4);
+    transform: translateY(-4px);
+  }
+  .plan-card.featured {
+    border-color: #c8a96e;
+    background: #141008;
+    position: relative;
+  }
+  .plan-badge {
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: #c8a96e;
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .plan-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.08em;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .plan-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .plan-price span {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.4);
+  }
+  .plan-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .plan-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #e03c31;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: filter 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .plan-btn:hover { filter: brightness(1.15); }
+  .plan-card.featured .plan-btn { background: #c8a96e; color: #000; }
+
+  /* =============================================
+     KEYFRAMES
+  ============================================= */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50%       { transform: rotate(45deg) translateY(6px); }
+  }
+  @keyframes vpFloat {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-120vh) translateX(40px); opacity: 0; }
+  }
+
+  /* =============================================
+     MOBILE
+  ============================================= */
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .nav-signin { display: none; }
+    .hero-buttons { max-width: 100%; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     NAVIGATION — tylerraw layout
+============================================ -->
+<nav class="navbar">
+  <div class="nav-avatar">TT</div>
+  <a href="#" class="nav-brand">TRIAD T</a>
+  <ul class="nav-links">
+    <li><a href="#videos">Videos</a></li>
+    <li><a href="#plans">Plans</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#plans" class="nav-signin">Sign In</a>
+  <a href="#plans" class="nav-join">Join</a>
+</nav>
+
+
+<!-- ============================================
+     HERO — Full screen video background
+     HOW TO ADD YOUR VIDEO:
+     Replace the <source> src with your file path.
+     Works with .mp4, .webm. Loop + muted + autoplay
+     is required for autoplay in browsers.
+============================================ -->
+<section class="hero">
+
+  <!-- YOUR VIDEO GOES HERE — replace "your-video.mp4" -->
+  <video
+    class="hero-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    poster=""
+    id="heroVideo"
+  >
+    <source src="your-video.mp4" type="video/mp4">
+    <!-- Fallback shows if video doesn't load -->
+  </video>
+
+  <!-- Fallback visual when no video file present -->
+  <div class="hero-video-fallback" id="videoFallback"></div>
+
+  <!-- Floating bokeh particles simulating video depth -->
+  <div class="video-particles" id="particles"></div>
+
+  <!-- Dark overlay -->
+  <div class="hero-overlay"></div>
+
+  <!-- Main content -->
+  <div class="hero-content">
+    <h1 class="hero-title">TRIAD T<br>ENTERPRISE</h1>
+
+    <!-- Update this tagline to match your brand voice -->
+    <p class="hero-tagline">
+      Raw. Unfiltered. Premium Editing.<br>
+      This is where your footage becomes cinematic.
+    </p>
+
+    <!-- STACKED BUTTONS — same layout as tylerraw -->
+    <div class="hero-buttons">
+      <a href="#videos" class="hero-btn btn-red">Video Editors</a>
+      <a href="#photos" class="hero-btn btn-blue">Photo Editors</a>
+      <a href="#gallery" class="hero-btn btn-green">My Gallery</a>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-chevron"></div>
+  </div>
+
+</section>
+
+
+<!-- ============================================
+     BELOW HERO — Videos & Plans
+============================================ -->
+<div class="content-sections">
+  <div class="content-inner">
+
+    <!-- Latest Work -->
+    <h2 class="section-title" id="videos">LATEST WORK</h2>
+    <div class="video-grid">
+
+      <a href="#" class="video-card">
+        <div class="video-thumb">
+          <div class="video-thumb-bg thumb-1"></div>
+          <div class="play-btn"></div>
+          <span class="duration-badge">3:42</span>
+        </div>
+        <div class="video-meta">
+          <p class="video-label">Brand Film</p>
+          <p class="video-name">Untitled Campaign — Director's Cut</p>
+        </div>
+      </a>
+
+      <a href="#" class="video-card">
+        <div class="video-thumb">
+          <div class="video-thumb-bg thumb-2"></div>
+          <div class="play-btn"></div>
+          <span class="duration-badge">1:18</span>
+        </div>
+        <div class="video-meta">
+          <p class="video-label">Social Reel</p>
+          <p class="video-name">Drop Season — Full Series Edit</p>
+        </div>
+      </a>
+
+      <a href="#" class="video-card">
+        <div class="video-thumb">
+          <div class="video-thumb-bg thumb-3"></div>
+          <div class="play-btn"></div>
+          <span class="duration-badge">22:07</span>
+        </div>
+        <div class="video-meta">
+          <p class="video-label">Documentary</p>
+          <p class="video-name">Roots — Long Form Narrative</p>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Plans -->
+    <h2 class="section-title" id="plans">PLANS</h2>
+    <div class="plans-grid">
+
+      <div class="plan-card">
+        <p class="plan-name">Starter</p>
+        <p class="plan-price">$299 <span>/ project</span></p>
+        <p class="plan-desc">Short form edits. Reels, TikToks, YouTube Shorts. Fast 48h turnaround.</p>
+        <a href="#contact" class="plan-btn">Get Started</a>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-badge">Most Popular</div>
+        <p class="plan-name">Pro</p>
+        <p class="plan-price">$799 <span>/ project</span></p>
+        <p class="plan-desc">Full post-production. Color grade, sound design, motion graphics, unlimited revisions.</p>
+        <a href="#contact" class="plan-btn">Get Started</a>
+      </div>
+
+      <div class="plan-card">
+        <p class="plan-name">Retainer</p>
+        <p class="plan-price">$1,500 <span>/ mo</span></p>
+        <p class="plan-desc">Ongoing brand content partner. Priority slots, dedicated editor, monthly delivery schedule.</p>
+        <a href="#contact" class="plan-btn">Get Started</a>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ============================================
+     JAVASCRIPT
+============================================ -->
+<script>
+  /* ---- Hide fallback if real video loads ---- */
+  const video = document.getElementById('heroVideo');
+  const fallback = document.getElementById('videoFallback');
+
+  video.addEventListener('canplay', () => {
+    fallback.style.display = 'none';
+  });
+
+  // If video errors (no file), keep fallback visible
+  video.addEventListener('error', () => {
+    fallback.style.display = 'block';
+  });
+
+  /* ---- Generate bokeh particles ---- */
+  const container = document.getElementById('particles');
+  const count = 14;
+
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'vp';
+
+    const size = Math.random() * 180 + 60;
+    const left = Math.random() * 100;
+    const duration = Math.random() * 18 + 12;
+    const delay = Math.random() * -20;
+    const opacity = Math.random() * 0.12 + 0.04;
+
+    dot.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${left}%;
+      bottom: -${size}px;
+      animation-duration: ${duration}s;
+      animation-delay: ${delay}s;
+      opacity: ${opacity};
+      background: ${Math.random() > 0.5 ? 'rgba(200,169,110,0.2)' : 'rgba(80,120,255,0.15)'};
+    `;
+    container.appendChild(dot);
+  }
+
+  /* ---- Smooth scroll ---- */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
