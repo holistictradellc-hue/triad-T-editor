@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Triad T Enterprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .page-hero {
+    position: relative;
+    height: 420px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 40px 60px;
+    overflow: hidden;
+    margin-top: var(--nav-height);
+    background: linear-gradient(160deg, #0e0a18 0%, #080808 60%, #180d0a 100%);
+  }
+  .page-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(200,169,110,0.1) 0%, transparent 60%);
+  }
+  .page-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px);
+  }
+  .page-hero-text { position: relative; z-index: 2; }
+  .page-hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: block;
+  }
+  .page-hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(52px, 10vw, 100px);
+    line-height: 0.95;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .page-hero-ghost {
+    position: absolute;
+    right: -0.02em;
+    bottom: -0.05em;
+    font-family: var(--font-display);
+    font-size: clamp(120px, 20vw, 260px);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(200,169,110,0.06);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Gallery filter tabs */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .filter-btn {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-dark);
+    background: transparent;
+    color: var(--gray-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+  }
+  .filter-btn:hover,
+  .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* =============================================
+     GALLERY — mixed media grid
+  ============================================= */
+  .gallery-section { margin-bottom: 80px; }
+
+  /* Large featured row */
+  .gallery-featured {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* Standard masonry */
+  .gallery-masonry {
+    columns: 4;
+    column-gap: 14px;
+  }
+
+  .gallery-item {
+    break-inside: avoid;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--charcoal);
+    border: 1px solid var(--white-faint);
+    cursor: pointer;
+    transition: border-color 0.25s, transform 0.25s;
+    position: relative;
+    display: block;
+    text-decoration: none;
+  }
+  .gallery-item:hover {
+    border-color: rgba(200,169,110,0.45);
+    transform: scale(1.02);
+  }
+
+  .gallery-item.featured-main { border-radius: 8px; }
+  .gallery-item.featured-side { border-radius: 8px; }
+
+  /* Placeholder blocks */
+  .gallery-thumb {
+    width: 100%;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .gallery-item:hover .gallery-thumb { transform: scale(1.05); }
+
+  .gh-tall   { height: 360px; }
+  .gh-medium { height: 240px; }
+  .gh-short  { height: 160px; }
+  .gh-wide   { height: 420px; }
+  .gh-feat   { height: 500px; }
+  .gh-side   { height: 500px; }
+
+  /* Color palettes */
+  .gc-1  { background: linear-gradient(145deg, #1a1208, #3d2a10 55%, #0d0d0d); }
+  .gc-2  { background: linear-gradient(145deg, #08101a, #102040 55%, #0d0d0d); }
+  .gc-3  { background: linear-gradient(145deg, #0a1a0e, #0e3020 55%, #0d0d0d); }
+  .gc-4  { background: linear-gradient(145deg, #1a0a12, #30102a 55%, #0d0d0d); }
+  .gc-5  { background: linear-gradient(145deg, #0a1a1a, #103030 55%, #0d0d0d); }
+  .gc-6  { background: linear-gradient(145deg, #1a1a08, #28280e 55%, #0d0d0d); }
+  .gc-7  { background: linear-gradient(145deg, #180810, #300820 55%, #0d0d0d); }
+  .gc-8  { background: linear-gradient(145deg, #081018, #0e2030 55%, #0d0d0d); }
+  .gc-9  { background: linear-gradient(145deg, #0e1a08, #1a2e10 55%, #0d0d0d); }
+  .gc-10 { background: linear-gradient(145deg, #1a1008, #302010 55%, #0d0d0d); }
+  .gc-11 { background: linear-gradient(145deg, #100818, #201030 55%, #0d0d0d); }
+  .gc-12 { background: linear-gradient(145deg, #081810, #102818 55%, #0d0d0d); }
+
+  /* Video indicator badge */
+  .media-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--white);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+  .media-badge.video { border-color: rgba(200,169,110,0.4); color: var(--accent); }
+  .media-badge.photo { border-color: rgba(80,140,255,0.4); color: #6fa3ff; }
+
+  /* Hover info overlay */
+  .gallery-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.25s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px;
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+  .overlay-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 5px;
+  }
+  .overlay-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  /* Lightbox overlay */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .lightbox.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .lightbox-inner {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox-content {
+    width: 700px;
+    height: 500px;
+    border-radius: 8px;
+    border: 1px solid rgba(200,169,110,0.2);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: -48px;
+    right: 0;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+    font-family: var(--font-body);
+  }
+  .lightbox-close:hover { color: var(--accent); }
+  .lightbox-info {
+    position: absolute;
+    bottom: -52px;
+    left: 0;
+  }
+  .lightbox-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: var(--white);
+  }
+  .lightbox-sub {
+    font-size: 12px;
+    color: var(--gray-light);
+    letter-spacing: 0.1em;
+  }
+
+  /* Stats strip */
+  .gallery-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--white-faint);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 80px;
+  }
+  .gstat {
+    padding: 32px 28px;
+    border-right: 1px solid var(--white-faint);
+    text-align: center;
+  }
+  .gstat:last-child { border-right: none; }
+  .gstat-num {
+    font-family: var(--font-display);
+    font-size: 52px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .gstat-num span { color: var(--accent); }
+  .gstat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+  }
+
+  /* Upload CTA */
+  .upload-cta {
+    background: var(--off-black);
+    border: 1px solid rgba(200,169,110,0.25);
+    border-radius: 12px;
+    padding: 48px 40px;
+    text-align: center;
+    margin-bottom: 80px;
+  }
+  .upload-cta h3 {
+    font-family: var(--font-display);
+    font-size: 40px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+  .upload-cta p {
+    font-size: 15px;
+    color: var(--gray-light);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+  .upload-cta-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 900px) {
+    .gallery-masonry { columns: 3; }
+    .gallery-featured { grid-template-columns: 1fr; }
+    .gh-feat, .gh-side { height: 280px; }
+  }
+  @media (max-width: 640px) {
+    .gallery-masonry { columns: 2; }
+    .gallery-stats { grid-template-columns: 1fr; }
+    .gstat { border-right: none; border-bottom: 1px solid var(--white-faint); }
+    .gstat:last-child { border-bottom: none; }
+  }
+  @media (max-width: 400px) {
+    .gallery-masonry { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo-link">
+    <img src="logo.png" alt="Triad T Enterprise" class="nav-logo-img">
+  </a>
+  <ul class="nav-links">
+    <li><a href="video-editors.html">Video Editors</a></li>
+    <li><a href="photo-editors.html">Photo Editors</a></li>
+    <li><a href="gallery.html" class="active">Gallery</a></li>
+    <li><a href="index.html#plans">Plans</a></li>
+  </ul>
+  <a href="index.html#plans" class="nav-signin">Sign In</a>
+  <a href="index.html#plans" class="nav-join">Join</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-ghost">GALLERY</div>
+  <div class="page-hero-text">
+    <span class="page-hero-label">Triad T Enterprise</span>
+    <h1 class="page-hero-title">My<br>Gallery</h1>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content-sections">
+  <div class="content-inner">
+
+    <!-- Filters -->
+    <div class="filter-bar reveal">
+      <button class="filter-btn active">All</button>
+      <button class="filter-btn">📹 Video</button>
+      <button class="filter-btn">📷 Photo</button>
+      <button class="filter-btn">2024</button>
+      <button class="filter-btn">2023</button>
+      <button class="filter-btn">Favorites</button>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="gallery-stats reveal">
+      <div class="gstat">
+        <div class="gstat-num">48<span>+</span></div>
+        <div class="gstat-label">Pieces</div>
+      </div>
+      <div class="gstat">
+        <div class="gstat-num">12<span>+</span></div>
+        <div class="gstat-label">Projects</div>
+      </div>
+      <div class="gstat">
+        <div class="gstat-num">3<span>yrs</span></div>
+        <div class="gstat-label">Of Work</div>
+      </div>
+    </div>
+
+    <!-- Featured row -->
+    <div class="gallery-section">
+      <h2 class="section-title reveal">Featured</h2>
+
+      <div class="gallery-featured reveal">
+        <a href="#" class="gallery-item featured-main" data-title="Untitled Campaign" data-type="Brand Film">
+          <div class="gallery-thumb gh-feat gc-1"></div>
+          <span class="media-badge video">▶ Video</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Brand Film · 2024</span>
+            <span class="overlay-title">Untitled Campaign</span>
+          </div>
+        </a>
+        <a href="#" class="gallery-item featured-side" data-title="Golden Hour" data-type="Portrait">
+          <div class="gallery-thumb gh-side gc-4"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Portrait · 2024</span>
+            <span class="overlay-title">Golden Hour</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Masonry gallery -->
+      <div class="gallery-masonry">
+
+        <a href="#" class="gallery-item reveal" data-title="Drop Season" data-type="Social">
+          <div class="gallery-thumb gh-medium gc-2"></div>
+          <span class="media-badge video">▶ Video</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Social · 2024</span>
+            <span class="overlay-title">Drop Season</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Studio Set 01" data-type="Photo">
+          <div class="gallery-thumb gh-tall gc-5"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Portrait · 2024</span>
+            <span class="overlay-title">Studio Set 01</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Noir Series" data-type="Editorial">
+          <div class="gallery-thumb gh-short gc-7"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Editorial · 2024</span>
+            <span class="overlay-title">Noir Series</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Blue Hour" data-type="Music Video">
+          <div class="gallery-thumb gh-medium gc-4"></div>
+          <span class="media-badge video">▶ Video</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Music Video · 2024</span>
+            <span class="overlay-title">Blue Hour</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Lookbook Vol.2" data-type="Fashion">
+          <div class="gallery-thumb gh-short gc-3"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Fashion · 2024</span>
+            <span class="overlay-title">Lookbook Vol.2</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Roots" data-type="Documentary">
+          <div class="gallery-thumb gh-tall gc-9"></div>
+          <span class="media-badge video">▶ Video</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Documentary · 2024</span>
+            <span class="overlay-title">Roots</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Brand Shoot A" data-type="Product">
+          <div class="gallery-thumb gh-medium gc-6"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Product · 2024</span>
+            <span class="overlay-title">Brand Shoot A</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Last Light" data-type="Short Film">
+          <div class="gallery-thumb gh-short gc-11"></div>
+          <span class="media-badge video">▶ Video</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Short Film · 2024</span>
+            <span class="overlay-title">Last Light</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Executive Portraits" data-type="Portrait">
+          <div class="gallery-thumb gh-tall gc-8"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Corporate · 2023</span>
+            <span class="overlay-title">Executive Portraits</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Identity Reel" data-type="Motion">
+          <div class="gallery-thumb gh-medium gc-10"></div>
+          <span class="media-badge video">▶ Video</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Motion Graphics · 2023</span>
+            <span class="overlay-title">Identity Reel</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Night Event" data-type="Event">
+          <div class="gallery-thumb gh-short gc-2"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Event · 2023</span>
+            <span class="overlay-title">Night Event</span>
+          </div>
+        </a>
+
+        <a href="#" class="gallery-item reveal" data-title="Skin & Light" data-type="Retouch">
+          <div class="gallery-thumb gh-medium gc-12"></div>
+          <span class="media-badge photo">◼ Photo</span>
+          <div class="gallery-overlay">
+            <span class="overlay-label">Retouching · 2023</span>
+            <span class="overlay-title">Skin & Light</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Upload/Submit CTA -->
+    <div class="upload-cta reveal">
+      <h3>Want Your Work Here?</h3>
+      <p>Send us your project for review. Selected work gets featured in the gallery and promoted across our channels.</p>
+      <div class="upload-cta-btns">
+        <a href="mailto:media@triadtenterprise.com" class="btn btn-accent" style="padding:14px 36px;">Submit Work</a>
+        <a href="video-editors.html" class="btn btn-outline" style="padding:14px 36px;">View Services</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <div class="lightbox-content gc-1" id="lightboxContent"></div>
+    <div class="lightbox-info">
+      <div class="lightbox-title" id="lightboxTitle"></div>
+      <div class="lightbox-sub" id="lightboxSub"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-brand">TRIAD T ENTERPRISE</span>
+  <span class="footer-copy">© 2024 — Media Division</span>
+  <ul class="footer-links">
+    <li><a href="#">Instagram</a></li>
+    <li><a href="#">Vimeo</a></li>
+    <li><a href="mailto:media@triadtenterprise.com">Email</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Lightbox
+  const lightbox      = document.getElementById('lightbox');
+  const lightboxClose = document.getElementById('lightboxClose');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const lightboxSub   = document.getElementById('lightboxSub');
+
+  document.querySelectorAll('.gallery-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      lightboxTitle.textContent = item.dataset.title || '';
+      lightboxSub.textContent   = item.dataset.type  || '';
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  lightboxClose.addEventListener('click', () => {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+
+  lightbox.addEventListener('click', e => {
+    if (e.target === lightbox) {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // ESC to close
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.06 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

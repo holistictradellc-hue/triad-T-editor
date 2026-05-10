@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Editors — Triad T Enterprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .page-hero {
+    position: relative;
+    height: 420px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 40px 60px;
+    overflow: hidden;
+    margin-top: var(--nav-height);
+    background: linear-gradient(160deg, #1a1208 0%, #080808 60%, #0d0d18 100%);
+  }
+  .page-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 60% 40%, rgba(200,169,110,0.12) 0%, transparent 65%);
+  }
+  .page-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px);
+  }
+  .page-hero-text { position: relative; z-index: 2; }
+  .page-hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: block;
+  }
+  .page-hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(52px, 10vw, 100px);
+    line-height: 0.95;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .page-hero-ghost {
+    position: absolute;
+    right: -0.02em;
+    bottom: -0.05em;
+    font-family: var(--font-display);
+    font-size: clamp(120px, 20vw, 260px);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(200,169,110,0.06);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .filter-btn {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-dark);
+    background: transparent;
+    color: var(--gray-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+  }
+  .filter-btn:hover,
+  .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* Editor cards */
+  .editors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 80px;
+  }
+  .editor-card {
+    background: var(--off-black);
+    border: 1px solid var(--white-faint);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+  }
+  .editor-card:hover {
+    border-color: rgba(200,169,110,0.4);
+    transform: translateY(-4px);
+  }
+  .editor-thumb {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+  .editor-thumb-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.5s ease;
+  }
+  .editor-card:hover .editor-thumb-bg { transform: scale(1.05); }
+
+  .et-1 { background: linear-gradient(135deg, #1a120a 0%, #3d2a10 50%, #0d0d0d 100%); }
+  .et-2 { background: linear-gradient(135deg, #0a0d1a 0%, #102040 50%, #0d0d0d 100%); }
+  .et-3 { background: linear-gradient(135deg, #0a1a0e 0%, #0e3020 50%, #0d0d0d 100%); }
+  .et-4 { background: linear-gradient(135deg, #1a0a14 0%, #30102a 50%, #0d0d0d 100%); }
+  .et-5 { background: linear-gradient(135deg, #1a1a0a 0%, #2a2a10 50%, #0d0d0d 100%); }
+  .et-6 { background: linear-gradient(135deg, #0a1a1a 0%, #103030 50%, #0d0d0d 100%); }
+
+  /* Scanlines */
+  .editor-thumb-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+  }
+
+  .editor-play {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px; height: 52px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.3);
+  }
+  .editor-play::after {
+    content: '';
+    border: 0 solid transparent;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 14px solid #fff;
+    margin-left: 4px;
+  }
+  .editor-card:hover .editor-play {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .editor-tag {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(200,169,110,0.4);
+    color: var(--accent);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+  .editor-duration {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  .editor-info {
+    padding: 18px 20px 22px;
+  }
+  .editor-category {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .editor-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 8px;
+    line-height: 1.1;
+  }
+  .editor-desc {
+    font-size: 13px;
+    color: var(--gray-light);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .editor-meta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .editor-stat {
+    font-size: 11px;
+    color: var(--gray-mid);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .editor-stat span { color: var(--white-dim); font-weight: 500; }
+
+  /* CTA banner */
+  .cta-banner {
+    background: var(--off-black);
+    border: 1px solid rgba(200,169,110,0.25);
+    border-radius: 12px;
+    padding: 48px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 80px;
+  }
+  .cta-banner-text h3 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .cta-banner-text p {
+    font-size: 14px;
+    color: var(--gray-light);
+    line-height: 1.6;
+    max-width: 420px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo-link">
+    <img src="logo.png" alt="Triad T Enterprise" class="nav-logo-img">
+  </a>
+  <ul class="nav-links">
+    <li><a href="video-editors.html" class="active">Video Editors</a></li>
+    <li><a href="photo-editors.html">Photo Editors</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="index.html#plans">Plans</a></li>
+  </ul>
+  <a href="index.html#plans" class="nav-signin">Sign In</a>
+  <a href="index.html#plans" class="nav-join">Join</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-ghost">VIDEO</div>
+  <div class="page-hero-text">
+    <span class="page-hero-label">Triad T Enterprise</span>
+    <h1 class="page-hero-title">Video<br>Editors</h1>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content-sections">
+  <div class="content-inner">
+
+    <!-- Filter bar -->
+    <div class="filter-bar reveal">
+      <button class="filter-btn active">All</button>
+      <button class="filter-btn">Brand Films</button>
+      <button class="filter-btn">Social Reels</button>
+      <button class="filter-btn">Documentary</button>
+      <button class="filter-btn">Music Video</button>
+      <button class="filter-btn">Short Film</button>
+    </div>
+
+    <!-- Editors / Work Grid -->
+    <div class="editors-grid">
+
+      <a href="#" class="editor-card reveal">
+        <div class="editor-thumb">
+          <div class="editor-thumb-bg et-1"></div>
+          <div class="editor-play"></div>
+          <span class="editor-tag">Brand Film</span>
+          <span class="editor-duration">3:42</span>
+        </div>
+        <div class="editor-info">
+          <p class="editor-category">Commercial · 2024</p>
+          <h3 class="editor-title">Untitled Campaign</h3>
+          <p class="editor-desc">Full commercial edit with color grade, sound design, and motion title package.</p>
+          <div class="editor-meta">
+            <span class="editor-stat">Cut by <span>Editor A</span></span>
+            <span class="editor-stat">4K <span>ProRes</span></span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="editor-card reveal">
+        <div class="editor-thumb">
+          <div class="editor-thumb-bg et-2"></div>
+          <div class="editor-play"></div>
+          <span class="editor-tag">Social Reel</span>
+          <span class="editor-duration">0:58</span>
+        </div>
+        <div class="editor-info">
+          <p class="editor-category">Instagram · 2024</p>
+          <h3 class="editor-title">Drop Season Series</h3>
+          <p class="editor-desc">Six-part vertical reel series for a streetwear brand launch campaign.</p>
+          <div class="editor-meta">
+            <span class="editor-stat">Cut by <span>Editor B</span></span>
+            <span class="editor-stat">Vertical <span>9:16</span></span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="editor-card reveal">
+        <div class="editor-thumb">
+          <div class="editor-thumb-bg et-3"></div>
+          <div class="editor-play"></div>
+          <span class="editor-tag">Documentary</span>
+          <span class="editor-duration">22:14</span>
+        </div>
+        <div class="editor-info">
+          <p class="editor-category">Long Form · 2024</p>
+          <h3 class="editor-title">Roots — Full Cut</h3>
+          <p class="editor-desc">22-minute narrative documentary. Full post: edit, grade, mix, titles.</p>
+          <div class="editor-meta">
+            <span class="editor-stat">Cut by <span>Editor A</span></span>
+            <span class="editor-stat">Cinematic <span>2.39:1</span></span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="editor-card reveal">
+        <div class="editor-thumb">
+          <div class="editor-thumb-bg et-4"></div>
+          <div class="editor-play"></div>
+          <span class="editor-tag">Music Video</span>
+          <span class="editor-duration">4:05</span>
+        </div>
+        <div class="editor-info">
+          <p class="editor-category">Music · 2024</p>
+          <h3 class="editor-title">Blue Hour</h3>
+          <p class="editor-desc">Moody R&B music video. Heavy color work, transitions timed to beat.</p>
+          <div class="editor-meta">
+            <span class="editor-stat">Cut by <span>Editor C</span></span>
+            <span class="editor-stat">Grade <span>Teal/Orange</span></span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="editor-card reveal">
+        <div class="editor-thumb">
+          <div class="editor-thumb-bg et-5"></div>
+          <div class="editor-play"></div>
+          <span class="editor-tag">Short Film</span>
+          <span class="editor-duration">11:30</span>
+        </div>
+        <div class="editor-info">
+          <p class="editor-category">Narrative · 2024</p>
+          <h3 class="editor-title">Last Light</h3>
+          <p class="editor-desc">Short film post-production. Dialogue cut, sound design, DCP export.</p>
+          <div class="editor-meta">
+            <span class="editor-stat">Cut by <span>Editor B</span></span>
+            <span class="editor-stat">Film <span>Festival Cut</span></span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="editor-card reveal">
+        <div class="editor-thumb">
+          <div class="editor-thumb-bg et-6"></div>
+          <div class="editor-play"></div>
+          <span class="editor-tag">Brand Film</span>
+          <span class="editor-duration">2:20</span>
+        </div>
+        <div class="editor-info">
+          <p class="editor-category">Corporate · 2024</p>
+          <h3 class="editor-title">Identity Reel 2024</h3>
+          <p class="editor-desc">Company highlight reel. Motion graphics, animated logo, kinetic typography.</p>
+          <div class="editor-meta">
+            <span class="editor-stat">Cut by <span>Editor A</span></span>
+            <span class="editor-stat">Motion <span>After Effects</span></span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- CTA Banner -->
+    <div class="cta-banner reveal">
+      <div class="cta-banner-text">
+        <h3>Need a Video Edit?</h3>
+        <p>Tell us about your project — footage, vision, deadline. We'll respond within 24 hours with a clear scope and quote.</p>
+      </div>
+      <a href="mailto:media@triadtenterprise.com" class="btn btn-accent" style="padding:16px 40px;font-size:15px;">Start a Project</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-brand">TRIAD T ENTERPRISE</span>
+  <span class="footer-copy">© 2024 — Media Division</span>
+  <ul class="footer-links">
+    <li><a href="#">Instagram</a></li>
+    <li><a href="#">Vimeo</a></li>
+    <li><a href="mailto:media@triadtenterprise.com">Email</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

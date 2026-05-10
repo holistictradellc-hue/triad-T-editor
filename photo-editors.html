@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Editors — Triad T Enterprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .page-hero {
+    position: relative;
+    height: 420px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 40px 60px;
+    overflow: hidden;
+    margin-top: var(--nav-height);
+    background: linear-gradient(160deg, #0a1018 0%, #080808 60%, #0d100d 100%);
+  }
+  .page-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 40% 50%, rgba(80,140,255,0.1) 0%, transparent 60%);
+  }
+  .page-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px);
+  }
+  .page-hero-text { position: relative; z-index: 2; }
+  .page-hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: block;
+  }
+  .page-hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(52px, 10vw, 100px);
+    line-height: 0.95;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .page-hero-ghost {
+    position: absolute;
+    right: -0.02em;
+    bottom: -0.05em;
+    font-family: var(--font-display);
+    font-size: clamp(120px, 20vw, 260px);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(200,169,110,0.06);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Style filter */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .filter-btn {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-dark);
+    background: transparent;
+    color: var(--gray-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+  }
+  .filter-btn:hover,
+  .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* Masonry photo grid */
+  .masonry {
+    columns: 3;
+    column-gap: 14px;
+    margin-bottom: 64px;
+  }
+
+  .photo-item {
+    break-inside: avoid;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--charcoal);
+    border: 1px solid var(--white-faint);
+    cursor: pointer;
+    transition: border-color 0.25s, transform 0.25s;
+    position: relative;
+    display: block;
+    text-decoration: none;
+  }
+  .photo-item:hover {
+    border-color: rgba(200,169,110,0.4);
+    transform: translateY(-3px);
+  }
+
+  /* Placeholder photo blocks — replace with real <img> tags */
+  .photo-placeholder {
+    width: 100%;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .photo-item:hover .photo-placeholder { transform: scale(1.04); }
+
+  .ph-tall   { height: 340px; }
+  .ph-medium { height: 240px; }
+  .ph-short  { height: 180px; }
+
+  /* Colors simulating different shots */
+  .pc-1 { background: linear-gradient(160deg, #1a1208, #3d2a10 60%, #0d0d0d); }
+  .pc-2 { background: linear-gradient(160deg, #08101a, #102040 60%, #0d0d0d); }
+  .pc-3 { background: linear-gradient(160deg, #0a1a0e, #0e3020 60%, #0d0d0d); }
+  .pc-4 { background: linear-gradient(160deg, #1a0a12, #30102a 60%, #0d0d0d); }
+  .pc-5 { background: linear-gradient(160deg, #0a1a1a, #103030 60%, #0d0d0d); }
+  .pc-6 { background: linear-gradient(160deg, #1a1a08, #28280e 60%, #0d0d0d); }
+  .pc-7 { background: linear-gradient(160deg, #180810, #300820 60%, #0d0d0d); }
+  .pc-8 { background: linear-gradient(160deg, #081018, #0e2030 60%, #0d0d0d); }
+  .pc-9 { background: linear-gradient(160deg, #0e1a08, #1a2e10 60%, #0d0d0d); }
+
+  /* Hover overlay on photos */
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 55%);
+    opacity: 0;
+    transition: opacity 0.25s;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .photo-item:hover .photo-overlay { opacity: 1; }
+
+  .photo-overlay-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 5px;
+  }
+  .photo-overlay-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+  }
+
+  /* Editor profiles section */
+  .editors-section { margin-bottom: 80px; }
+
+  .editors-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .editor-profile {
+    background: var(--off-black);
+    border: 1px solid var(--white-faint);
+    border-radius: 10px;
+    padding: 28px 24px;
+    transition: border-color 0.25s, transform 0.2s;
+  }
+  .editor-profile:hover {
+    border-color: rgba(200,169,110,0.35);
+    transform: translateY(-3px);
+  }
+  .profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: #000;
+  }
+  .av-gold   { background: linear-gradient(135deg, #c8a96e, #8b6914); }
+  .av-blue   { background: linear-gradient(135deg, #3b7de8, #1a4aaa); }
+  .av-green  { background: linear-gradient(135deg, #2eab5e, #1a6a38); }
+
+  .profile-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .profile-role {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .profile-bio {
+    font-size: 13px;
+    color: var(--gray-light);
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+  .profile-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .skill-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--gray-dark);
+    color: var(--gray-mid);
+    border-radius: 3px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .editor-profile:hover .skill-tag {
+    border-color: rgba(200,169,110,0.3);
+    color: var(--accent);
+  }
+
+  /* CTA banner */
+  .cta-banner {
+    background: var(--off-black);
+    border: 1px solid rgba(200,169,110,0.25);
+    border-radius: 12px;
+    padding: 48px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 80px;
+  }
+  .cta-banner-text h3 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .cta-banner-text p {
+    font-size: 14px;
+    color: var(--gray-light);
+    line-height: 1.6;
+    max-width: 420px;
+  }
+
+  @media (max-width: 768px) {
+    .masonry { columns: 2; }
+  }
+  @media (max-width: 480px) {
+    .masonry { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo-link">
+    <img src="logo.png" alt="Triad T Enterprise" class="nav-logo-img">
+  </a>
+  <ul class="nav-links">
+    <li><a href="video-editors.html">Video Editors</a></li>
+    <li><a href="photo-editors.html" class="active">Photo Editors</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="index.html#plans">Plans</a></li>
+  </ul>
+  <a href="index.html#plans" class="nav-signin">Sign In</a>
+  <a href="index.html#plans" class="nav-join">Join</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-ghost">PHOTO</div>
+  <div class="page-hero-text">
+    <span class="page-hero-label">Triad T Enterprise</span>
+    <h1 class="page-hero-title">Photo<br>Editors</h1>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content-sections">
+  <div class="content-inner">
+
+    <!-- Filter -->
+    <div class="filter-bar reveal">
+      <button class="filter-btn active">All</button>
+      <button class="filter-btn">Portrait</button>
+      <button class="filter-btn">Editorial</button>
+      <button class="filter-btn">Product</button>
+      <button class="filter-btn">Event</button>
+      <button class="filter-btn">Retouching</button>
+    </div>
+
+    <!-- Masonry Grid — replace divs with real <img> tags -->
+    <div class="masonry">
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-tall pc-1"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Portrait · Retouch</span>
+          <span class="photo-overlay-title">Studio Session 01</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-short pc-2"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Product · Clean</span>
+          <span class="photo-overlay-title">Brand Shoot A</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-medium pc-3"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Editorial · Fashion</span>
+          <span class="photo-overlay-title">Lookbook Vol.2</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-medium pc-4"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Event · Coverage</span>
+          <span class="photo-overlay-title">Night Event Edit</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-tall pc-5"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Portrait · Outdoor</span>
+          <span class="photo-overlay-title">Golden Hour Set</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-short pc-6"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Product · Composite</span>
+          <span class="photo-overlay-title">Drop Campaign</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-medium pc-7"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Editorial · Dark</span>
+          <span class="photo-overlay-title">Noir Series</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-short pc-8"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Retouching</span>
+          <span class="photo-overlay-title">Skin & Light Work</span>
+        </div>
+      </a>
+
+      <a href="#" class="photo-item reveal">
+        <div class="photo-placeholder ph-tall pc-9"></div>
+        <div class="photo-overlay">
+          <span class="photo-overlay-label">Portrait · Studio</span>
+          <span class="photo-overlay-title">Executive Portraits</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Editor Profiles -->
+    <div class="editors-section">
+      <h2 class="section-title reveal">Our Photo Editors</h2>
+      <div class="editors-row">
+
+        <div class="editor-profile reveal">
+          <div class="profile-avatar av-gold">A</div>
+          <p class="profile-name">Editor A</p>
+          <p class="profile-role">Senior Retoucher</p>
+          <p class="profile-bio">Specializes in high-end portrait retouching, skin work, and editorial compositing. 6+ years in commercial photography post.</p>
+          <div class="profile-skills">
+            <span class="skill-tag">Photoshop</span>
+            <span class="skill-tag">Lightroom</span>
+            <span class="skill-tag">Frequency Sep.</span>
+            <span class="skill-tag">Compositing</span>
+          </div>
+        </div>
+
+        <div class="editor-profile reveal">
+          <div class="profile-avatar av-blue">B</div>
+          <p class="profile-name">Editor B</p>
+          <p class="profile-role">Color Specialist</p>
+          <p class="profile-bio">Expert in color grading for photography, product photography clean-up, and batch processing for large shoots.</p>
+          <div class="profile-skills">
+            <span class="skill-tag">Capture One</span>
+            <span class="skill-tag">Lightroom</span>
+            <span class="skill-tag">Color Theory</span>
+            <span class="skill-tag">Batch Edit</span>
+          </div>
+        </div>
+
+        <div class="editor-profile reveal">
+          <div class="profile-avatar av-green">C</div>
+          <p class="profile-name">Editor C</p>
+          <p class="profile-role">Editorial & Fashion</p>
+          <p class="profile-bio">Fashion and editorial photography specialist. Background in magazine post-production and lookbook creation.</p>
+          <div class="profile-skills">
+            <span class="skill-tag">Photoshop</span>
+            <span class="skill-tag">Editorial</span>
+            <span class="skill-tag">Fashion</span>
+            <span class="skill-tag">Magazine</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-banner reveal">
+      <div class="cta-banner-text">
+        <h3>Need Photo Editing?</h3>
+        <p>From single portraits to full shoot retouching — we deliver clean, consistent, professional results on your timeline.</p>
+      </div>
+      <a href="mailto:media@triadtenterprise.com" class="btn btn-accent" style="padding:16px 40px;font-size:15px;">Start a Project</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-brand">TRIAD T ENTERPRISE</span>
+  <span class="footer-copy">© 2024 — Media Division</span>
+  <ul class="footer-links">
+    <li><a href="#">Instagram</a></li>
+    <li><a href="#">Vimeo</a></li>
+    <li><a href="mailto:media@triadtenterprise.com">Email</a></li>
+  </ul>
+</footer>
+
+<script>
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.06 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
